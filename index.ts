@@ -1,5 +1,5 @@
-import express from 'express';
-import cookieParser from 'cookie-parser';
+import express, { Router } from 'express'
+import cookieParser from 'cookie-parser'
 import * as hbs from 'express-handlebars'
 import { json, static as expressStatic } from 'express'
 import { HomeRouter } from './routes/home'
@@ -7,6 +7,7 @@ import { ConfiguratorRouter } from './routes/configurator'
 import { OrderRouter } from './routes/order'
 import { handlebarsHelpers } from './utils/handlebars-helpers'
 import { COOKIE_BASES, COOKIE_ADDONS } from './data/cookies-data'
+import { MyRouter } from './types/my-router'
 
 export class CookieMakerApp {
 	private app: express.Application
@@ -14,6 +15,7 @@ export class CookieMakerApp {
 		COOKIE_BASES,
 		COOKIE_ADDONS,
 	}
+	private readonly routers = [HomeRouter, ConfiguratorRouter, OrderRouter]
 	constructor() {
 		this._configureApp()
 		this._setRoutes()
@@ -37,9 +39,10 @@ export class CookieMakerApp {
 	}
 
 	_setRoutes(): void {
-		this.app.use('/', new HomeRouter(this).router)
-		this.app.use('/configurator', new ConfiguratorRouter(this).router)
-		this.app.use('/order', new OrderRouter(this).router)
+		for (const router of this.routers) {
+			const obj: MyRouter = new router(this)
+			this.app.use(obj.urlPrefix, new router(this).router)
+		}
 	}
 
 	_run(): void {

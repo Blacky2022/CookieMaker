@@ -2,7 +2,10 @@ import { Request, Response, Router } from 'express'
 import { CookieMakerApp } from '..'
 import { Base } from '../types/bases'
 import { Addons } from '../types/addons'
-export class ConfiguratorRouter {
+import { MyRouter } from '../types/my-router'
+
+export class ConfiguratorRouter implements MyRouter {
+	public readonly urlPrefix = '/configurator'
 	public readonly router: Router = Router()
 
 	constructor(private cmapp: CookieMakerApp) {
@@ -15,7 +18,7 @@ export class ConfiguratorRouter {
 		this.router.get('/delete-addon/:addonName', this.deleteAddon)
 	}
 
-	private selectBase = (req: Request, res: Response): undefined | void => {
+	private selectBase = (req: Request, res: Response): void => {
 		const { baseName } = req.params as {
 			baseName: Base
 		}

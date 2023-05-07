@@ -1,41 +1,38 @@
+import { Router, Request, Response } from 'express'
+import { CookieMakerApp } from '..'
+import { MyRouter } from '../types/my-router'
 
-import { Router, Request, Response } from 'express';
-import { CookieMakerApp } from '..';
+export class OrderRouter implements MyRouter {
+	public readonly urlPrefix = '/order'
+	public readonly router: Router = Router()
+	constructor(private cmapp: CookieMakerApp) {
+		this.setUpRoutes()
+	}
 
-export class OrderRouter {
-    public readonly router: Router = Router()
-    constructor(private cmapp: CookieMakerApp) {
-        this.setUpRoutes();
-    }
+	private setUpRoutes() {
+		this.router.get('/summary', this.sumary)
+		this.router.get('/thanks', this.thanks)
+	}
 
-    setUpRoutes() {
-        this.router.get('/summary', this.sumary);
-        this.router.get('/thanks', this.thanks);
-    }
+	private sumary = (req: Request, res: Response): void => {
+		const { sum, addons, base, allBases, allAddons } = this.cmapp.getCookieSettings(req)
 
-    sumary = (req: Request, res:Response): void => {
-        const {sum, addons, base, allBases, allAddons} = this.cmapp.getCookieSettings(req);
+		res.render('order/summary', {
+			cookie: {
+				base,
+				addons,
+			},
+			allBases,
+			allAddons,
+			sum,
+		})
+	}
 
-        res.render('order/summary', {
-            cookie: {
-                base,
-                addons,
-            },
-            allBases,
-            allAddons,
-            sum,
-        });
-    };
+	private thanks = (req: Request, res: Response): void => {
+		const { sum } = this.cmapp.getCookieSettings(req)
 
-    thanks = (req:Request, res:Response):void => {
-        const {sum} = this.cmapp.getCookieSettings(req);
-
-        res
-            .clearCookie('cookieBase')
-            .clearCookie('cookieAddons')
-            .render('order/thanks', {
-                sum,
-            });
-    }
+		res.clearCookie('cookieBase').clearCookie('cookieAddons').render('order/thanks', {
+			sum,
+		})
+	}
 }
-
